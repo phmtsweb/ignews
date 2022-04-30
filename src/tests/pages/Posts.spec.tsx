@@ -1,23 +1,28 @@
-import { render, screen } from '@testing-library/react'
-import { mocked } from 'ts-jest/utils'
+import { render, screen } from '@testing-library/react';
+import { mocked } from 'ts-jest/utils';
 import Posts, { getStaticProps } from '../../pages/posts';
-import { getPrismicClient } from '../../services/prismic'
+import { getPrismicClient } from '../../services/prismic';
+
+jest.mock('../../services/prismic');
 
 const posts = [
-  { slug: 'my-new-post', title: 'My New Post', excerpt: 'Post excerpt', updatedAt: '10 de Abril' }
+  {
+    slug: 'my-new-post',
+    title: 'My new post',
+    excerpt: 'Post excerpt',
+    updatedAt: '10th March',
+  },
 ];
-
-jest.mock('../../services/prismic')
 
 describe('Posts page', () => {
   it('renders correctly', () => {
-    render(<Posts posts={posts} />)
+    render(<Posts posts={posts} />);
 
-    expect(screen.getByText("My New Post")).toBeInTheDocument()
+    expect(screen.getByText('My new post')).toBeInTheDocument();
   });
 
-  it('loads initial data', async () => {
-    const getPrismicClientMocked = mocked(getPrismicClient)
+  it('loads intial data', async () => {
+    const getPrismicClientMocked = mocked(getPrismicClient);
 
     getPrismicClientMocked.mockReturnValueOnce({
       query: jest.fn().mockResolvedValueOnce({
@@ -25,32 +30,32 @@ describe('Posts page', () => {
           {
             uid: 'my-new-post',
             data: {
-              title: [
-                { type: 'heading', text: 'My new post' }
-              ],
+              title: [{ type: 'heading', text: 'My new post' }],
               content: [
-                { type: 'paragraph', text: 'Post excerpt' }
+                { type: 'paragraph', text: 'My new post is very nice' },
               ],
             },
             last_publication_date: '04-01-2021',
-          }
-        ]
-      })
-    } as any)
+          },
+        ],
+      }),
+    } as any);
 
-    const response = await getStaticProps({})
+    const response = await getStaticProps({});
 
     expect(response).toEqual(
       expect.objectContaining({
         props: {
-          posts: [{
-            slug: 'my-new-post',
-            title: 'My new post',
-            excerpt: 'Post excerpt',
-            updatedAt: '01 de abril de 2021'
-          }]
-        }
+          posts: [
+            {
+              slug: 'my-new-post',
+              title: 'My new post',
+              excerpt: 'My new post is very nice',
+              updatedAt: '01 de abril de 2021',
+            },
+          ],
+        },
       })
-    )
+    );
   });
-})
+});
